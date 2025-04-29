@@ -1,25 +1,22 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
   <meta charset="UTF-8">
   <title>Connexion privée</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <h2>Connexion par e-mail</h2>
   <input type="email" id="email" placeholder="Adresse e-mail">
   <input type="password" id="password" placeholder="Mot de passe">
-  <button onclick="loginWithEmail()">Se connecter</button>
-  <hr>
+  <button onclick="signUp()">Créer un compte</button>
+  <button onclick="signIn()">Se connecter</button>
 
-  <h2>Connexion par téléphone</h2>
-  <input type="text" id="phone" placeholder="+33612345678">
-  <div id="recaptcha-container"></div>
-  <button onclick="sendSMS()">Recevoir un code</button>
-  <br>
-  <input type="text" id="code" placeholder="Code reçu par SMS">
-  <button onclick="verifyCode()">Valider le code</button>
+  <br><br>
+  <button id="btnSecret" style="display:none;" onclick="goToSecret()">Aller à la page secrète</button>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -35,39 +32,35 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    function loginWithEmail() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => alert("Connexion réussie !"))
-        .catch(error => alert("Erreur : " + error.message));
-    }
-
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      'size': 'normal',
-      'callback': function(response) {
-        // Recaptcha validé
+    // Affiche le bouton si l'utilisateur est déjà connecté
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById('btnSecret').style.display = 'inline-block';
       }
     });
 
-    let confirmationResult;
-
-    function sendSMS() {
-      const phoneNumber = document.getElementById("phone").value;
-      auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
-        .then(result => {
-          confirmationResult = result;
-          alert("Code envoyé !");
+    function signUp() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = "secrete.html";
         })
-        .catch(error => alert("Erreur : " + error.message));
+        .catch(error => alert(error.message));
     }
 
-    function verifyCode() {
-      const code = document.getElementById("code").value;
-      confirmationResult.confirm(code)
-        .then(() => alert("Connexion réussie !"))
-        .catch(error => alert("Erreur : " + error.message));
+    function signIn() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = "secrete.html";
+        })
+        .catch(error => alert(error.message));
+    }
+
+    function goToSecret() {
+      window.location.href = "secrete.html";
     }
   </script>
 </body>
