@@ -5,14 +5,26 @@
   <title>Connexion privée</title>
 </head>
 <body>
-  <h2>Connexion par e-mail</h2>
-  <input type="email" id="email" placeholder="Adresse e-mail">
-  <input type="password" id="password" placeholder="Mot de passe">
-  <button onclick="signUp()">Créer un compte</button>
+  <h2>Connexion</h2>
+  <input type="email" id="emailLogin" placeholder="Adresse e-mail">
+  <input type="password" id="passwordLogin" placeholder="Mot de passe">
   <button onclick="signIn()">Se connecter</button>
+  <button onclick="showSignUpForm()">Créer un compte</button>
 
   <br><br>
   <button id="btnSecret" style="display:none;" onclick="goToSecret()">Aller à la page secrète</button>
+
+  <!-- Formulaire d'inscription caché -->
+  <div id="signupForm" style="display:none; margin-top: 20px;">
+    <h3>Inscription</h3>
+    <input type="text" id="nom" placeholder="Nom"><br>
+    <input type="text" id="prenom" placeholder="Prénom"><br>
+    <input type="text" id="pseudo" placeholder="Pseudo"><br>
+    <input type="text" id="emailOrPhone" placeholder="E-mail ou téléphone"><br>
+    <input type="password" id="passwordSignUp" placeholder="Mot de passe"><br>
+    <input type="password" id="confirmPassword" placeholder="Confirmer le mot de passe"><br>
+    <button onclick="signUp()">Valider l'inscription</button>
+  </div>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
@@ -32,26 +44,41 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Affiche le bouton si l'utilisateur est déjà connecté
+    // Affiche le bouton secret si utilisateur connecté
     auth.onAuthStateChanged(user => {
       if (user) {
         document.getElementById('btnSecret').style.display = 'inline-block';
       }
     });
 
+    function showSignUpForm() {
+      document.getElementById("signupForm").style.display = "block";
+    }
+
     function signUp() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      auth.createUserWithEmailAndPassword(email, password)
+      const nom = document.getElementById("nom").value;
+      const prenom = document.getElementById("prenom").value;
+      const pseudo = document.getElementById("pseudo").value;
+      const emailOrPhone = document.getElementById("emailOrPhone").value;
+      const password = document.getElementById("passwordSignUp").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password !== confirmPassword) {
+        alert("Les mots de passe ne correspondent pas.");
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(emailOrPhone, password)
         .then(() => {
+          alert("Compte créé pour " + prenom + " " + nom + " !");
           window.location.href = "secrete.html";
         })
         .catch(error => alert(error.message));
     }
 
     function signIn() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = document.getElementById("emailLogin").value;
+      const password = document.getElementById("passwordLogin").value;
       auth.signInWithEmailAndPassword(email, password)
         .then(() => {
           window.location.href = "secrete.html";
